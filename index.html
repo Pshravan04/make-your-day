@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Little Something for You 💛</title>
+    
+    <!-- 
+        Tailwind CSS for rapid styling
+        GSAP for smooth, complex animation timelines
+        Google Fonts for elegant typography
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cream': '#FDFBF7',
+                        'blush': '#F9E8E8',
+                        'butter': '#FFF7D6',
+                        'sage': '#E3EAD8',
+                        'sunflower': '#F4C430',
+                        'sunflower-dark': '#E0AA0F',
+                        'ink': '#3A3532',
+                    },
+                    fontFamily: {
+                        'serif': ['"Playfair Display"', 'serif'],     // Used for elegant headings & quotes
+                        'script': ['"Dancing Script"', 'cursive'],    // Used for romantic handwritten lines
+                        'sans': ['"Quicksand"', 'sans-serif'],        // Used for clean body text
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for Animations & SVG Filters -->
+    <style>
+        /* Base styles */
+        body {
+            background: linear-gradient(135deg, #FDFBF7 0%, #F9E8E8 100%);
+            color: #3A3532;
+            overflow: hidden; /* Hide scrollbars for an immersive full-screen experience */
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* SVG Filters for that beautiful hand-drawn/watercolor aesthetic */
+        .sketch-filter { filter: url(#rough-edge); }
+        .watercolor-filter { filter: url(#watercolor); }
+
+        /* --- CSS Animations --- */
+        
+        /* Gentle bobbing effect for main elements */
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        .float-anim {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* Breathing/pulsing effect */
+        @keyframes pulse-slow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        .pulse-slow {
+            animation: pulse-slow 4s ease-in-out infinite;
+        }
+
+        /* Ambient floating petals */
+        @keyframes float-petal {
+            0% { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(360deg) translateX(30px); opacity: 0; }
+        }
+        .petal-particle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #F9E8E8;
+            border-radius: 50% 0 50% 50%; /* Petal shape */
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        /* Hidden audio element */
+        #audio-player { display: none; }
+        
+        /* Interactive button styles */
+        .btn-hover-bloom {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-hover-bloom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(244, 196, 48, 0.5); /* Glowing sunflower effect */
+        }
+    </style>
+</head>
+<body class="font-sans antialiased relative">
+    
+    <!-- === SVG Asset Definitions === -->
+    <svg width="0" height="0" class="absolute hidden">
+        <defs>
+            <!-- Filter: Creates a rough, pencil-like edge -->
+            <filter id="rough-edge">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+            
+            <!-- Filter: Creates a soft watercolor bleed effect -->
+            <filter id="watercolor">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+                <feGaussianBlur in="displaced" stdDeviation="0.5" result="blurred" />
+                <feMerge>
+                    <feMergeNode in="blurred" />
+                    <feMergeNode in="SourceGraphic" />
+                </feMerge>
+            </filter>
+            
+            <!-- Pattern: Center seeds for the sunflower -->
+            <pattern id="seed-pattern" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <circle cx="2" cy="2" r="1.5" fill="#1A1510" />
+                <circle cx="5" cy="5" r="1" fill="#2C2419" />
+            </pattern>
+
+            <!-- Base Sunflower Component (Reused in loading, intro, and main screens) -->
+            <g id="flower-sunflower">
+                <g class="sketch-filter transition-transform duration-1000 origin-center" id="sunflower-group">
+                    <!-- Petals are dynamically generated via JavaScript for richness -->
+                    <g id="sunflower-petals"></g>
+                    <!-- Center core -->
+                    <circle cx="100" cy="100" r="38" fill="#4A3B2C" />
+                    <circle cx="100" cy="100" r="35" fill="#3A2F22" stroke="#2C2419" stroke-width="2" stroke-dasharray="2,3"/>
+                    <circle cx="100" cy="100" r="30" fill="url(#seed-pattern)" opacity="0.7" />
+                </g>
+            </g>
+        </defs>
+    </svg>
+
+    <!-- === Global Background Particles === -->
+    <div id="petals-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- === 1. Loading Screen === -->
+    <div id="loading-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-cream z-50 transition-opacity duration-1000">
+        <div class="w-20 h-20 pulse-slow">
+            <svg viewBox="0 0 200 200" class="w-full h-full text-sunflower">
+                <use href="#flower-sunflower" x="0" y="0" />
+            </svg>
+        </div>
+        <p class="font-script text-3xl text-ink mt-6 animate-pulse">Just a moment...</p>
+    </div>
+
+    <!-- === 2. Intro Landing Screen === -->
+    <div id="intro-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 z-40 opacity-0 hidden">
+        <!-- Hero Image -->
+        <div class="relative w-48 h-48 sm:w-64 sm:h-64 mb-8 float-anim">
+            <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.05)]" id="intro-sunflower">
+                <use href="#flower-sunflower" x="0" y="0" />
+            </svg>
+        </div>
+        
+        <!-- Animated Typography -->
+        <div class="text-center max-w-lg mx-auto space-y-6 min-h-[180px] px-4">
+            <h1 id="text-1" class="font-script text-5xl sm:text-6xl text-ink opacity-0 leading-tight">Heyy... ✨</h1>
+            <p id="text-2" class="font-serif text-xl sm:text-2xl text-ink/80 italic opacity-0">I know your mood today is a little off</p>
+            <p id="text-3" class="font-sans text-lg sm:text-xl text-ink/90 leading-relaxed opacity-0 font-medium">
+                But even on your cloudy days, you light up my world brighter than any sunflower ever could.
+            </p>
+            <div id="text-4" class="opacity-0 pt-4">
+                <p class="font-script text-3xl sm:text-4xl text-ink">Here's something made just for you...</p>
+                <p class="font-serif text-lg sm:text-xl mt-3 text-ink/85 leading-relaxed">
+                    I hope your day gets better because your smile is extra special to me.<br>
+                    <span class="font-script text-2xl mt-2 inline-block">I hope you like it 💛</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Start Button -->
+        <button id="start-btn" class="mt-12 px-10 py-4 bg-white/60 backdrop-blur-md border border-sunflower/40 rounded-full font-serif text-xl text-ink shadow-[0_8px_25px_rgba(244,196,48,0.25)] btn-hover-bloom opacity-0 flex items-center space-x-3 group relative overflow-hidden">
+            <div class="absolute inset-0 bg-sunflower/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+            <span class="relative z-10 font-medium">Bloom</span>
+            <svg class="w-6 h-6 text-sunflower relative z-10 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+    </div>
+
+    <!-- === 3. Main Experience Screen === -->
+    <!-- Beautiful radial gradient background indicating warmth -->
+    <div id="main-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 z-30 opacity-0 hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cream via-blush/40 to-blush/70">
+        
+        <!-- Central Hero Element -->
+        <div id="main-centerpiece" class="relative w-64 h-64 sm:w-[350px] sm:h-[350px] float-anim pulse-slow z-20">
+            <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl" id="main-sunflower">
+                <use href="#flower-sunflower" x="0" y="0" />
+            </svg>
+            <!-- Delicate decorative rotating rings -->
+            <div class="absolute inset-0 border-2 border-sunflower/20 rounded-full scale-[1.15] animate-[spin_25s_linear_infinite]"></div>
+            <div class="absolute inset-0 border border-sunflower/15 rounded-full scale-[1.3] animate-[spin_15s_linear_infinite_reverse] border-dashed"></div>
+        </div>
+
+        <!-- Dynamic Surrounding Flowers Container -->
+        <div id="surround-flowers" class="absolute inset-0 pointer-events-none z-10"></div>
+
+        <!-- Music & Personal Message Section -->
+        <div class="mt-20 z-30 flex flex-col items-center relative w-full max-w-md">
+            
+            <button id="play-song-btn" class="px-10 py-4 bg-white/80 backdrop-blur-xl border border-white rounded-full font-serif text-xl text-ink shadow-[0_10px_35px_rgba(0,0,0,0.08)] btn-hover-bloom flex items-center space-x-3 overflow-hidden relative group">
+                <div class="absolute inset-0 bg-sunflower/15 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <!-- Music Icon -->
+                <svg class="w-6 h-6 text-sunflower relative z-10" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+                <span class="relative z-10">Play Our Song</span>
+            </button>
+
+            <!-- Personalized Message Card (Revealed on play) -->
+            <div id="message-card" class="mt-8 p-8 w-full bg-white/85 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-[0_15px_50px_rgba(0,0,0,0.08)] opacity-0 translate-y-12 relative overflow-hidden">
+                <!-- Aesthetic corner accents -->
+                <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-sunflower/40 m-5 rounded-tl"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-sunflower/40 m-5 rounded-br"></div>
+                
+                <h3 class="font-script text-4xl text-center text-ink mb-6">For You ✨</h3>
+                
+                <!-- ✏️ EDIT THIS MESSAGE ✏️ -->
+                <p class="font-serif text-lg sm:text-xl leading-relaxed text-ink/90 text-center relative z-10">
+                    "Every time I see you smile, my heart blooms like these flowers.<br><br>
+                    You make ordinary days feel like magic.<br><br>
+                    Thank you for existing. 💐"
+                </p>
+                <!-- ✏️ END MESSAGE ✏️ -->
+
+                <!-- ✏️ EDIT NAME ✏️ -->
+                <p class="font-script text-3xl text-center text-ink/80 mt-8">- Yours always</p>
+            </div>
+            
+            <button id="restart-btn" class="mt-8 text-sm font-sans text-ink/40 hover:text-ink/80 transition-colors opacity-0 underline underline-offset-4 hidden">Experience Again</button>
+        </div>
+    </div>
+
+    <!-- === Audio Elements === -->
+    <!-- ✏️ EDIT AUDIO URL HERE ✏️ -->
+    <audio id="audio-player" src="JAB TAK Full Video  M.S. DHONI -THEUNTOLD STORY  Armaan Malik.mp3" loop preload="auto"></audio>
+    
+    <!-- Optional: Soft rustle sound effect on start -->
+    <audio id="rustle-sound" src="JAB TAK Full Video  M.S. DHONI -THEUNTOLD STORY  Armaan Malik.mp3" preload="auto" volume="0.3"></audio>
+
+    <!-- === Javascript Application Logic === -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // --- 1. SVG Procedural Generation ---
+            // Generates beautiful layered sunflower petals to keep the HTML clean
+            const generateSunflowerPetals = () => {
+                const petalsGroup = document.getElementById('sunflower-petals');
+                const centerX = 100;
+                const centerY = 100;
+                
+                // Helper to create a single petal
+                const createPetal = (angle, scaleMultiplier, colors) => {
+                    const petal = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    // Pointy, natural petal shape
+                    const d = `M ${centerX} ${centerY-35} C ${centerX-18} ${centerY-65}, ${centerX-12} ${centerY-95}, ${centerX} ${centerY-100} C ${centerX+12} ${centerY-95}, ${centerX+18} ${centerY-65}, ${centerX} ${centerY-35} Z`;
+                    petal.setAttribute('d', d);
+                    
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    petal.setAttribute('fill', color);
+                    petal.setAttribute('stroke', '#B8860B');
+                    petal.setAttribute('stroke-width', '0.5');
+                    petal.setAttribute('opacity', '0.9');
+                    
+                    // Rotate around center and scale slightly randomly for organic look
+                    const randomScale = scaleMultiplier * (0.9 + Math.random() * 0.2);
+                    petal.setAttribute('transform', `translate(${centerX} ${centerY}) rotate(${angle}) scale(${randomScale}) translate(-${centerX} -${centerY})`);
+                    
+                    petalsGroup.appendChild(petal);
+                };
+
+                // Outer layer petals
+                for(let i=0; i<24; i++) {
+                    createPetal(i * (360/24), 1, ['#F4C430', '#FFD700', '#DAA520', '#F3E5AB']);
+                }
+                // Inner layer petals (slightly offset, smaller, deeper color)
+                for(let i=0; i<24; i++) {
+                    createPetal((i * (360/24)) + 7.5, 0.85, ['#FFA500', '#FFC080', '#DAA520', '#F4C430']); 
+                }
+            };
+            
+            generateSunflowerPetals();
+
+            // --- 2. Ambient Particle System ---
+            // Creates floating petals and sparkles in the background
+            const createParticle = () => {
+                const container = document.getElementById('petals-container');
+                const particle = document.createElement('div');
+                const isSparkle = Math.random() > 0.7; // 30% chance for sparkle
+                
+                if (isSparkle) {
+                    particle.className = 'absolute rounded-full bg-white pointer-events-none z-10';
+                    particle.style.width = Math.random() * 4 + 2 + 'px';
+                    particle.style.height = particle.style.width;
+                    particle.style.boxShadow = '0 0 8px 2px rgba(255,255,255,0.9)';
+                } else {
+                    particle.className = 'petal-particle';
+                    const colors = ['#F9E8E8', '#FFF7D6', '#E3EAD8', '#FFB7B2'];
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                }
+
+                particle.style.left = Math.random() * 100 + 'vw';
+                const duration = Math.random() * 15 + 10; // 10-25s falling duration
+                const delay = Math.random() * 10; // Random start delay
+                
+                particle.style.animation = `float-petal ${duration}s linear ${delay}s infinite`;
+                container.appendChild(particle);
+            };
+
+            // Spawn 40 ambient particles
+            for(let i=0; i<40; i++) createParticle();
+
+            // --- 3. Animation Sequences (GSAP) ---
+            const introScreen = document.getElementById('intro-screen');
+            const mainScreen = document.getElementById('main-screen');
+            
+            // Initial load transition
+            setTimeout(() => {
+                const loading = document.getElementById('loading-screen');
+                loading.style.opacity = '0';
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    startIntroSequence();
+                }, 1000);
+            }, 1800);
+
+            // Intro text timeline
+            const startIntroSequence = () => {
+                introScreen.classList.remove('hidden');
+                const tl = gsap.timeline();
+                
+                tl.to(introScreen, { opacity: 1, duration: 1, ease: "power2.inOut" })
+                  .fromTo("#intro-sunflower", 
+                      { rotation: -15, scale: 0.8, opacity: 0 }, 
+                      { rotation: 0, scale: 1, opacity: 1, duration: 2.5, ease: "back.out(1.2)" },
+                      "-=0.5"
+                  )
+                  .to("#text-1", { opacity: 1, y: -10, duration: 1.5, ease: "power2.out" }, "-=1")
+                  .to("#text-2", { opacity: 1, duration: 1.5 }, "+=0.8")
+                  .to("#text-3", { opacity: 1, y: -5, duration: 1.5 }, "+=1.8")
+                  .to("#text-4", { opacity: 1, y: -5, duration: 2 }, "+=2.5")
+                  .to("#start-btn", { opacity: 1, y: -10, duration: 1.5 }, "+=1");
+            };
+
+            // Transition from Intro to Main Screen
+            document.getElementById('start-btn').addEventListener('click', () => {
+                // Try playing rustle sound
+                try { document.getElementById('rustle-sound').play(); } catch(e){}
+                
+                const tl = gsap.timeline();
+                
+                tl.to(introScreen, { opacity: 0, scale: 1.05, duration: 1.2, ease: "power2.inOut", onComplete: () => {
+                    introScreen.classList.add('hidden');
+                    mainScreen.classList.remove('hidden');
+                    generateSurroundFlowers(); // Spawn the surrounding bouquet
+                }})
+                .to(mainScreen, { opacity: 1, duration: 1.5, ease: "power2.inOut" })
+                .fromTo("#main-centerpiece", 
+                    { scale: 0.4, rotation: 60, opacity: 0 },
+                    { scale: 1, rotation: 0, opacity: 1, duration: 2.5, ease: "elastic.out(1, 0.6)" },
+                    "-=0.8"
+                )
+                .fromTo("#play-song-btn",
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 1.5, ease: "power3.out" },
+                    "-=1"
+                );
+            });
+
+            // --- 4. Interactive Bouquet Generation ---
+            // Creates the hand-drawn daisies around the main sunflower
+            const generateSurroundFlowers = () => {
+                const container = document.getElementById('surround-flowers');
+                const numFlowers = 7;
+                // Responsive radius
+                const radius = window.innerWidth < 640 ? 130 : 200; 
+                
+                for(let i=0; i<numFlowers; i++) {
+                    const angle = (i * (Math.PI * 2)) / numFlowers;
+                    // Jitter positions slightly for organic feel
+                    const x = Math.cos(angle) * (radius + Math.random() * 30);
+                    const y = Math.sin(angle) * (radius + Math.random() * 30);
+                    
+                    const flower = document.createElement('div');
+                    flower.className = 'absolute left-1/2 top-1/2 -ml-10 -mt-10 w-20 h-20 opacity-0 sketch-filter drop-shadow-lg';
+                    flower.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+                    
+                    // Hand-drawn Daisy SVG
+                    flower.innerHTML = `
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <g fill="#FDFBF7" stroke="#E3EAD8" stroke-width="2">
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(0 50 50)" />
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(51.4 50 50)" />
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(102.8 50 50)" />
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(154.2 50 50)" />
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(205.6 50 50)" />
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(257 50 50)" />
+                                <ellipse cx="50" cy="22" rx="12" ry="22" transform="rotate(308.4 50 50)" />
+                            </g>
+                            <!-- Randomize center color between pastel pink and sage -->
+                            <circle cx="50" cy="50" r="16" fill="${Math.random() > 0.5 ? '#FFB7B2' : '#E3EAD8'}" />
+                        </svg>
+                    `;
+                    container.appendChild(flower);
+                    
+                    // Staggered blooming animation
+                    gsap.to(flower, {
+                        opacity: 0.9,
+                        scale: 0.8 + Math.random() * 0.4,
+                        rotation: Math.random() * 360,
+                        duration: 2.5,
+                        delay: 1.5 + (i * 0.2),
+                        ease: "elastic.out(1, 0.4)"
+                    });
+                    
+                    // Continuous floating motion
+                    gsap.to(flower, {
+                        y: "+=20",
+                        rotation: "+=10",
+                        duration: 3 + Math.random() * 3,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: "sine.inOut",
+                        delay: 4 + i
+                    });
+                }
+            };
+
+            // --- 5. Playback & Emotional Reveal ---
+            const audio = document.getElementById('audio-player');
+            const playBtn = document.getElementById('play-song-btn');
+            const messageCard = document.getElementById('message-card');
+            const restartBtn = document.getElementById('restart-btn');
+            let isPlaying = false;
+
+            playBtn.addEventListener('click', () => {
+                if(!isPlaying) {
+                    audio.play().then(() => {
+                        isPlaying = true;
+                        
+                        // Transform button
+                        playBtn.querySelector('span').innerText = "Playing Our Song 🎵";
+                        playBtn.classList.add('bg-sunflower/20', 'border-sunflower/50', 'text-ink');
+                        
+                        createBurst(); // Emotional impact explosion
+
+                        // Elegantly slide in the personalized message
+                        gsap.to(messageCard, {
+                            opacity: 1,
+                            y: 0,
+                            duration: 1.8,
+                            ease: "power3.out"
+                        });
+                        
+                        restartBtn.classList.remove('hidden');
+                        gsap.to(restartBtn, { opacity: 1, duration: 1, delay: 2.5 });
+                        
+                    }).catch(e => {
+                        console.error("Audio blocked by browser:", e);
+                        alert("Please make sure your device isn't muted! 💛");
+                    });
+                } else {
+                    audio.pause();
+                    isPlaying = false;
+                    playBtn.querySelector('span').innerText = "Play Our Song";
+                    playBtn.classList.remove('bg-sunflower/20', 'border-sunflower/50');
+                }
+            });
+
+            restartBtn.addEventListener('click', () => window.location.reload());
+
+            // --- 6. Joyful Confetti Burst ---
+            const createBurst = () => {
+                const colors = ['#F9E8E8', '#FFF7D6', '#FFB7B2', '#F4C430', '#E3EAD8'];
+                for(let i=0; i<60; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'absolute left-1/2 top-1/2 w-4 h-4 rounded-full z-50 pointer-events-none';
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Mix of circles and petals
+                    if(Math.random() > 0.4) {
+                        particle.style.borderRadius = '50% 0 50% 50%';
+                        particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    }
+                    
+                    document.getElementById('main-screen').appendChild(particle);
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const velocity = 80 + Math.random() * 200; // Explode outwards
+                    
+                    gsap.to(particle, {
+                        x: Math.cos(angle) * velocity,
+                        y: Math.sin(angle) * velocity + (Math.random() * 150), // Simulate gravity
+                        opacity: 0,
+                        rotation: Math.random() * 720,
+                        scale: Math.random() * 1.5,
+                        duration: 1.5 + Math.random() * 2,
+                        ease: "power2.out",
+                        onComplete: () => particle.remove()
+                    });
+                }
+            };
+            
+            // --- 7. Subtle Desktop Parallax ---
+            // Makes the flowers react to mouse movement for immersion
+            document.addEventListener('mousemove', (e) => {
+                if(window.innerWidth < 768 || mainScreen.classList.contains('hidden')) return;
+                
+                // Calculate cursor position relative to center (-1 to 1)
+                const x = (e.clientX / window.innerWidth - 0.5) * 30;
+                const y = (e.clientY / window.innerHeight - 0.5) * 30;
+                
+                // Move centerpiece slightly
+                gsap.to('#main-centerpiece', {
+                    x: x, y: y,
+                    duration: 1.5, ease: "power2.out"
+                });
+                
+                // Move surrounding bouquet inversely for 3D depth
+                gsap.to('#surround-flowers', {
+                    x: x * -1.2, y: y * -1.2,
+                    duration: 2, ease: "power2.out"
+                });
+            });
+        });
+    </script>
+</body>
+</html>
