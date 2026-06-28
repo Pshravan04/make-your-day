@@ -44,10 +44,12 @@
         body {
             background: linear-gradient(135deg, #FDFBF7 0%, #F9E8E8 100%);
             color: #3A3532;
-            overflow: hidden; /* Hide scrollbars for an immersive full-screen experience */
+            overflow-x: hidden; /* Hide horizontal overflow */
+            overflow-y: auto;   /* Allow scrolling if content is too tall on mobile */
             margin: 0;
             padding: 0;
-            height: 100vh;
+            min-height: 100vh;
+            min-height: 100dvh; /* Better mobile viewport height */
             width: 100vw;
         }
 
@@ -167,24 +169,24 @@
     <!-- === 2. Intro Landing Screen === -->
     <div id="intro-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 z-40 opacity-0 hidden">
         <!-- Hero Image -->
-        <div class="relative w-48 h-48 sm:w-64 sm:h-64 mb-8 float-anim">
+        <div class="relative w-40 h-40 sm:w-64 sm:h-64 mb-6 sm:mb-8 float-anim">
             <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.05)]" id="intro-sunflower">
                 <use href="#flower-sunflower" x="0" y="0" />
             </svg>
         </div>
         
         <!-- Animated Typography -->
-        <div class="text-center max-w-lg mx-auto space-y-6 min-h-[180px] px-4">
-            <h1 id="text-1" class="font-script text-5xl sm:text-6xl text-ink opacity-0 leading-tight">Heyy... ✨</h1>
-            <p id="text-2" class="font-serif text-xl sm:text-2xl text-ink/80 italic opacity-0">I know your mood today is a little off</p>
-            <p id="text-3" class="font-sans text-lg sm:text-xl text-ink/90 leading-relaxed opacity-0 font-medium">
+        <div class="text-center max-w-lg mx-auto space-y-4 sm:space-y-6 min-h-[180px] px-4">
+            <h1 id="text-1" class="font-script text-4xl sm:text-6xl text-ink opacity-0 leading-tight">Heyy... ✨</h1>
+            <p id="text-2" class="font-serif text-lg sm:text-2xl text-ink/80 italic opacity-0">I know your mood today is a little off</p>
+            <p id="text-3" class="font-sans text-base sm:text-xl text-ink/90 leading-relaxed opacity-0 font-medium">
                 But even on your cloudy days, you light up my world brighter than any sunflower ever could.
             </p>
-            <div id="text-4" class="opacity-0 pt-4">
-                <p class="font-script text-3xl sm:text-4xl text-ink">Here's something made just for you...</p>
-                <p class="font-serif text-lg sm:text-xl mt-3 text-ink/85 leading-relaxed">
+            <div id="text-4" class="opacity-0 pt-2 sm:pt-4">
+                <p class="font-script text-2xl sm:text-4xl text-ink">Here's something made just for you...</p>
+                <p class="font-serif text-base sm:text-xl mt-2 sm:mt-3 text-ink/85 leading-relaxed">
                     I hope your day gets better because your smile is extra special to me.<br>
-                    <span class="font-script text-2xl mt-2 inline-block">I hope you like it 💛</span>
+                    <span class="font-script text-xl sm:text-2xl mt-2 inline-block">I hope you like it 💛</span>
                 </p>
             </div>
         </div>
@@ -199,10 +201,10 @@
 
     <!-- === 3. Main Experience Screen === -->
     <!-- Beautiful radial gradient background indicating warmth -->
-    <div id="main-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 z-30 opacity-0 hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cream via-blush/40 to-blush/70">
+    <div id="main-screen" class="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 z-30 opacity-0 hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cream via-blush/40 to-blush/70 overflow-y-auto">
         
         <!-- Central Hero Element -->
-        <div id="main-centerpiece" class="relative w-64 h-64 sm:w-[350px] sm:h-[350px] float-anim pulse-slow z-20">
+        <div id="main-centerpiece" class="relative w-48 h-48 sm:w-[350px] sm:h-[350px] mt-8 sm:mt-0 float-anim pulse-slow z-20 flex-shrink-0">
             <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl" id="main-sunflower">
                 <use href="#flower-sunflower" x="0" y="0" />
             </svg>
@@ -215,25 +217,25 @@
         <div id="surround-flowers" class="absolute inset-0 pointer-events-none z-10"></div>
 
         <!-- Music & Personal Message Section -->
-        <div class="mt-20 z-30 flex flex-col items-center relative w-full max-w-md">
+        <div class="mt-12 sm:mt-20 z-30 flex flex-col items-center relative w-full max-w-md pb-10">
             
-            <button id="play-song-btn" class="px-10 py-4 bg-white/80 backdrop-blur-xl border border-white rounded-full font-serif text-xl text-ink shadow-[0_10px_35px_rgba(0,0,0,0.08)] btn-hover-bloom flex items-center space-x-3 overflow-hidden relative group">
+            <button id="play-song-btn" class="px-8 py-3 sm:px-10 sm:py-4 bg-white/80 backdrop-blur-xl border border-white rounded-full font-serif text-lg sm:text-xl text-ink shadow-[0_10px_35px_rgba(0,0,0,0.08)] btn-hover-bloom flex items-center space-x-3 overflow-hidden relative group">
                 <div class="absolute inset-0 bg-sunflower/15 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <!-- Music Icon -->
-                <svg class="w-6 h-6 text-sunflower relative z-10" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-sunflower relative z-10" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path></svg>
                 <span class="relative z-10">Play Song</span>
             </button>
 
             <!-- Personalized Message Card (Revealed on play) -->
-            <div id="message-card" class="mt-8 p-8 w-full bg-white/85 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-[0_15px_50px_rgba(0,0,0,0.08)] opacity-0 translate-y-12 relative overflow-hidden">
+            <div id="message-card" class="mt-6 sm:mt-8 p-6 sm:p-8 w-full bg-white/85 backdrop-blur-2xl border border-white/60 rounded-2xl sm:rounded-3xl shadow-[0_15px_50px_rgba(0,0,0,0.08)] opacity-0 translate-y-12 relative overflow-hidden">
                 <!-- Aesthetic corner accents -->
-                <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-sunflower/40 m-5 rounded-tl"></div>
-                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-sunflower/40 m-5 rounded-br"></div>
+                <div class="absolute top-0 left-0 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-l-2 border-sunflower/40 m-4 sm:m-5 rounded-tl"></div>
+                <div class="absolute bottom-0 right-0 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-r-2 border-sunflower/40 m-4 sm:m-5 rounded-br"></div>
                 
-                <h3 class="font-script text-4xl text-center text-ink mb-6">For You ✨</h3>
+                <h3 class="font-script text-3xl sm:text-4xl text-center text-ink mb-4 sm:mb-6">For You ✨</h3>
                 
                 <!-- ✏️ EDIT THIS MESSAGE ✏️ -->
-                <p class="font-serif text-lg sm:text-xl leading-relaxed text-ink/90 text-center relative z-10">
+                <p class="font-serif text-base sm:text-xl leading-relaxed text-ink/90 text-center relative z-10">
                     "Every time I see you smile, my heart blooms like these flowers.<br><br>
                     You make ordinary days feel like magic.<br><br>
                     Thank you for existing. 💐"
@@ -241,7 +243,7 @@
                 <!-- ✏️ END MESSAGE ✏️ -->
 
                 <!-- ✏️ EDIT NAME ✏️ -->
-                <p class="font-script text-3xl text-center text-ink/80 mt-8">- Yours always</p>
+                <p class="font-script text-2xl sm:text-3xl text-center text-ink/80 mt-6 sm:mt-8">- Yours always</p>
             </div>
             
             <button id="restart-btn" class="mt-8 text-sm font-sans text-ink/40 hover:text-ink/80 transition-colors opacity-0 underline underline-offset-4 hidden">Experience Again</button>
@@ -389,17 +391,18 @@
             const generateSurroundFlowers = () => {
                 const container = document.getElementById('surround-flowers');
                 const numFlowers = 7;
-                // Responsive radius
-                const radius = window.innerWidth < 640 ? 130 : 200; 
+                // Responsive radius (smaller on mobile)
+                const radius = window.innerWidth < 640 ? 100 : 200; 
                 
                 for(let i=0; i<numFlowers; i++) {
                     const angle = (i * (Math.PI * 2)) / numFlowers;
                     // Jitter positions slightly for organic feel
-                    const x = Math.cos(angle) * (radius + Math.random() * 30);
-                    const y = Math.sin(angle) * (radius + Math.random() * 30);
+                    const x = Math.cos(angle) * (radius + Math.random() * 20);
+                    const y = Math.sin(angle) * (radius + Math.random() * 20);
                     
                     const flower = document.createElement('div');
-                    flower.className = 'absolute left-1/2 top-1/2 -ml-10 -mt-10 w-20 h-20 opacity-0 sketch-filter drop-shadow-lg';
+                    // smaller flowers on mobile via scale
+                    flower.className = 'absolute left-1/2 top-1/2 -ml-10 -mt-10 w-16 h-16 sm:w-20 sm:h-20 opacity-0 sketch-filter drop-shadow-lg';
                     flower.style.transform = `translate(${x}px, ${y}px) scale(0)`;
                     
                     // Hand-drawn Daisy SVG
