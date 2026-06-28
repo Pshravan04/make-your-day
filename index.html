@@ -114,7 +114,7 @@
 <body class="font-sans antialiased relative">
     
     <!-- === SVG Asset Definitions === -->
-    <svg width="0" height="0" class="absolute hidden">
+    <svg width="0" height="0" style="position: absolute; width: 0; height: 0; pointer-events: none;">
         <defs>
             <!-- Filter: Creates a rough, pencil-like edge -->
             <filter id="rough-edge">
@@ -138,18 +138,6 @@
                 <circle cx="2" cy="2" r="1.5" fill="#1A1510" />
                 <circle cx="5" cy="5" r="1" fill="#2C2419" />
             </pattern>
-
-            <!-- Base Sunflower Component (Reused in loading, intro, and main screens) -->
-            <g id="flower-sunflower">
-                <g class="sketch-filter transition-transform duration-1000 origin-center" id="sunflower-group">
-                    <!-- Petals are dynamically generated via JavaScript for richness -->
-                    <g id="sunflower-petals"></g>
-                    <!-- Center core -->
-                    <circle cx="100" cy="100" r="38" fill="#4A3B2C" />
-                    <circle cx="100" cy="100" r="35" fill="#3A2F22" stroke="#2C2419" stroke-width="2" stroke-dasharray="2,3"/>
-                    <circle cx="100" cy="100" r="30" fill="url(#seed-pattern)" opacity="0.7" />
-                </g>
-            </g>
         </defs>
     </svg>
 
@@ -160,7 +148,13 @@
     <div id="loading-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-cream z-50 transition-opacity duration-1000">
         <div class="w-20 h-20 pulse-slow">
             <svg viewBox="0 0 200 200" class="w-full h-full text-sunflower">
-                <use href="#flower-sunflower" x="0" y="0" />
+                <g class="sketch-filter transition-transform duration-1000 origin-center">
+                    <g class="dynamic-petals"></g>
+                    <!-- Center core -->
+                    <circle cx="100" cy="100" r="38" fill="#4A3B2C" />
+                    <circle cx="100" cy="100" r="35" fill="#3A2F22" stroke="#2C2419" stroke-width="2" stroke-dasharray="2,3"/>
+                    <circle cx="100" cy="100" r="30" fill="url(#seed-pattern)" opacity="0.7" />
+                </g>
             </svg>
         </div>
         <p class="font-script text-3xl text-ink mt-6 animate-pulse">Just a moment...</p>
@@ -171,7 +165,12 @@
         <!-- Hero Image -->
         <div class="relative w-40 h-40 sm:w-64 sm:h-64 mb-6 sm:mb-8 float-anim">
             <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_10px_20px_rgba(0,0,0,0.05)]" id="intro-sunflower">
-                <use href="#flower-sunflower" x="0" y="0" />
+                <g class="sketch-filter transition-transform duration-1000 origin-center">
+                    <g class="dynamic-petals"></g>
+                    <circle cx="100" cy="100" r="38" fill="#4A3B2C" />
+                    <circle cx="100" cy="100" r="35" fill="#3A2F22" stroke="#2C2419" stroke-width="2" stroke-dasharray="2,3"/>
+                    <circle cx="100" cy="100" r="30" fill="url(#seed-pattern)" opacity="0.7" />
+                </g>
             </svg>
         </div>
         
@@ -206,7 +205,12 @@
         <!-- Central Hero Element -->
         <div id="main-centerpiece" class="relative w-48 h-48 sm:w-[350px] sm:h-[350px] mt-8 sm:mt-0 float-anim pulse-slow z-20 flex-shrink-0">
             <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl" id="main-sunflower">
-                <use href="#flower-sunflower" x="0" y="0" />
+                <g class="sketch-filter transition-transform duration-1000 origin-center">
+                    <g class="dynamic-petals"></g>
+                    <circle cx="100" cy="100" r="38" fill="#4A3B2C" />
+                    <circle cx="100" cy="100" r="35" fill="#3A2F22" stroke="#2C2419" stroke-width="2" stroke-dasharray="2,3"/>
+                    <circle cx="100" cy="100" r="30" fill="url(#seed-pattern)" opacity="0.7" />
+                </g>
             </svg>
             <!-- Delicate decorative rotating rings -->
             <div class="absolute inset-0 border-2 border-sunflower/20 rounded-full scale-[1.15] animate-[spin_25s_linear_infinite]"></div>
@@ -264,38 +268,34 @@
             // --- 1. SVG Procedural Generation ---
             // Generates beautiful layered sunflower petals to keep the HTML clean
             const generateSunflowerPetals = () => {
-                const petalsGroup = document.getElementById('sunflower-petals');
+                const petalGroups = document.querySelectorAll('.dynamic-petals');
                 const centerX = 100;
                 const centerY = 100;
                 
-                // Helper to create a single petal
-                const createPetal = (angle, scaleMultiplier, colors) => {
-                    const petal = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    // Pointy, natural petal shape
-                    const d = `M ${centerX} ${centerY-35} C ${centerX-18} ${centerY-65}, ${centerX-12} ${centerY-95}, ${centerX} ${centerY-100} C ${centerX+12} ${centerY-95}, ${centerX+18} ${centerY-65}, ${centerX} ${centerY-35} Z`;
-                    petal.setAttribute('d', d);
-                    
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    petal.setAttribute('fill', color);
-                    petal.setAttribute('stroke', '#B8860B');
-                    petal.setAttribute('stroke-width', '0.5');
-                    petal.setAttribute('opacity', '0.9');
-                    
-                    // Rotate around center and scale slightly randomly for organic look
-                    const randomScale = scaleMultiplier * (0.9 + Math.random() * 0.2);
-                    petal.setAttribute('transform', `translate(${centerX} ${centerY}) rotate(${angle}) scale(${randomScale}) translate(-${centerX} -${centerY})`);
-                    
-                    petalsGroup.appendChild(petal);
+                const getPetalsHTML = () => {
+                    let html = '';
+                    const createPetalHTML = (angle, scaleMultiplier, colors) => {
+                        const d = `M ${centerX} ${centerY-35} C ${centerX-18} ${centerY-65}, ${centerX-12} ${centerY-95}, ${centerX} ${centerY-100} C ${centerX+12} ${centerY-95}, ${centerX+18} ${centerY-65}, ${centerX} ${centerY-35} Z`;
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        const randomScale = scaleMultiplier * (0.9 + Math.random() * 0.2);
+                        return `<path d="${d}" fill="${color}" stroke="#B8860B" stroke-width="0.5" opacity="0.9" transform="translate(${centerX} ${centerY}) rotate(${angle}) scale(${randomScale}) translate(-${centerX} -${centerY})" />`;
+                    };
+
+                    // Outer layer petals
+                    for(let i=0; i<24; i++) {
+                        html += createPetalHTML(i * (360/24), 1, ['#F4C430', '#FFD700', '#DAA520', '#F3E5AB']);
+                    }
+                    // Inner layer petals (slightly offset, smaller, deeper color)
+                    for(let i=0; i<24; i++) {
+                        html += createPetalHTML((i * (360/24)) + 7.5, 0.85, ['#FFA500', '#FFC080', '#DAA520', '#F4C430']); 
+                    }
+                    return html;
                 };
 
-                // Outer layer petals
-                for(let i=0; i<24; i++) {
-                    createPetal(i * (360/24), 1, ['#F4C430', '#FFD700', '#DAA520', '#F3E5AB']);
-                }
-                // Inner layer petals (slightly offset, smaller, deeper color)
-                for(let i=0; i<24; i++) {
-                    createPetal((i * (360/24)) + 7.5, 0.85, ['#FFA500', '#FFC080', '#DAA520', '#F4C430']); 
-                }
+                const petalsHTML = getPetalsHTML();
+                petalGroups.forEach(group => {
+                    group.innerHTML = petalsHTML;
+                });
             };
             
             generateSunflowerPetals();
